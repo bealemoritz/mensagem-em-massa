@@ -129,7 +129,7 @@
   <div class="progress" aria-hidden="true"><i id="prog"></i></div>
 
   <div class="pace ready" id="pace">
-    <div><strong id="pace-title">Pode enviar a próxima</strong><div id="pace-sub">Depois de cada envio a página segura o próximo por 1 a 2 minutos.</div></div>
+    <div><strong id="pace-title">Pode enviar a próxima</strong><div id="pace-sub">A cada 8 mensagens enviadas, a página pausa por 1 minuto.</div></div>
     <div style="display:flex;align-items:center;gap:12px"><span class="timer" id="pace-timer"></span><button class="linkbtn" id="pace-skip" hidden>Pular espera</button></div>
   </div>
 
@@ -151,8 +151,8 @@
   <div class="view" id="view-como">
     <p class="intro">O WhatsApp bloqueia números que mandam muita mensagem igual, muito rápido, pra gente que não responde ou denuncia. Texto diferente pra cada uma já ajuda bastante, mas o ritmo conta tanto quanto.</p>
     <div class="guide">
-      <div class="g"><span class="flow-label">Ritmo</span><strong>Uma mensagem a cada 1 ou 2 minutos</strong><p>A página segura o próximo envio por um tempo aleatório entre 60 e 120 segundos depois de cada marcação. Dá pra pular, mas evite.</p></div>
-      <div class="g"><span class="flow-label">Pausas</span><strong>Pausa de 15 minutos a cada 15 envios</strong><p>A página avisa quando chegar a hora. Como a call é hoje, priorize as 4 top afiliadas e depois siga a lista.</p></div>
+      <div class="g"><span class="flow-label">Ritmo</span><strong>Pausa de 1 minuto a cada 8 mensagens</strong><p>Entre uma mensagem e outra não tem espera. Depois de cada 8 marcadas como enviadas, a página trava por 1 minuto. Dá pra pular, mas evite.</p></div>
+      <div class="g"><span class="flow-label">Prioridade</span><strong>Comece pelas mais importantes</strong><p>Como a call é hoje, mande primeiro a mensagem da Dri Martin (call às 17h), depois as 4 top afiliadas, e então siga a lista.</p></div>
       <div class="g"><span class="flow-label">Respostas</span><strong>Responda quem responder, na hora</strong><p>Conversa de ida e volta é o que mais mostra pro WhatsApp que o número é de gente de verdade. Quem confirmar presença, vale responder com um "te espero lá" pra fechar o combinado.</p></div>
       <div class="g"><span class="flow-label">Texto</span><strong>Pode mexer na mensagem antes de mandar</strong><p>A caixa de texto de cada card é editável. O que você mudar vai junto quando clicar em abrir no WhatsApp.</p></div>
     </div>
@@ -192,26 +192,26 @@
   function sentToday() { return Object.keys(SENT).filter(function (k) { return SENT[k] && SENT[k].enviado && isToday(SENT[k].data); }).length; }
   function startCooldown() {
     var n = sentToday();
-    var secs = (n > 0 && n % 15 === 0) ? 15 * 60 : 60 + Math.floor(Math.random() * 61);
-    nextAt = Date.now() + secs * 1000;
+    if (!(n > 0 && n % 8 === 0)) { tick(); return; }
+    nextAt = Date.now() + 60 * 1000;
     tick();
   }
   function tick() {
     clearTimeout(timer);
     var left = Math.max(0, Math.round((nextAt - Date.now()) / 1000));
     var pace = document.getElementById("pace");
-    var big = left > 150;
+    var big = false;
     if (left > 0) {
       pace.className = "pace" + (big ? " pause" : "");
-      document.getElementById("pace-title").textContent = big ? "Hora da pausa" : "Espera um pouquinho";
-      document.getElementById("pace-sub").textContent = big ? "Você mandou mais 15. Uma pausa de 15 minutos protege o número." : "Próxima mensagem liberada quando o contador zerar.";
+      document.getElementById("pace-title").textContent = big ? "Hora da pausa" : "Pausa de 1 minuto";
+      document.getElementById("pace-sub").textContent = big ? "Você mandou mais 15. Uma pausa de 15 minutos protege o número." : "Você mandou mais 8. A próxima libera quando o contador zerar.";
       document.getElementById("pace-timer").textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0");
       document.getElementById("pace-skip").hidden = false;
       timer = setTimeout(tick, 1000);
     } else {
       pace.className = "pace ready";
       document.getElementById("pace-title").textContent = "Pode enviar a próxima";
-      document.getElementById("pace-sub").textContent = "Depois de cada envio a página segura o próximo por 1 a 2 minutos.";
+      document.getElementById("pace-sub").textContent = "A cada 8 mensagens enviadas, a página pausa por 1 minuto.";
       document.getElementById("pace-timer").textContent = "";
       document.getElementById("pace-skip").hidden = true;
     }
